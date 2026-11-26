@@ -16,19 +16,19 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 
 ## Fase 1 — Integração do motor CAD elétrico
 
-Estado: **em curso — estratégia e branch de integração criadas; teste estrutural ainda pendente**. A base upstream permanece experimental.
+Estado: **em curso — integração CMake e build Windows x64 validados no CI do commit `49cef6c21e89a25895ecf14656e52d1b5acfd2d5`; a base upstream permanece experimental.**
 
 - [x] Criar branch de trabalho `feature/qelectrotech-integration`.
 - [x] Auditar o CMake upstream e identificar os alvos `qelectrotech_objects` e `qelectrotech`.
 - [x] Documentar a estratégia de aplicação única e critérios de aceitação (ver `INTEGRATION_STRATEGY.md`).
-- [ ] Validar CMake hierárquico com submódulo upstream fixado.
-- [x] Implementar o primeiro núcleo C++ de terminais e ligações e adicioná-lo ao alvo do executável QElectroTech (validação de build pendente).
-- [ ] Build Windows x64, testes upstream e testes do módulo próprio.
+- [x] Validar configuração CMake hierárquica e alvo integrado no workflow Windows (checkout upstream fixado pelo workflow; adoção de submódulo Git ainda pendente).
+- [x] Implementar o primeiro núcleo C++ de terminais e ligações e adicioná-lo ao alvo do executável QElectroTech.
+- [x] Build Windows x64, testes upstream e testes do módulo próprio no run 45869976768 (commit `49cef6c...`).
 - [ ] Confirmar deployment de Qt, recursos, traduções, elementos e modelos.
 - [ ] Testar abrir, guardar e exportar projetos de referência.
 - [ ] Editor unifilar e multifilar.
 - [ ] Símbolos com terminais e pontos de ligação.
-- [ ] Ligações terminal-a-terminal, nós e derivações.
+- [ ] Ligações terminal-a-terminal, nós e derivações (API inicial de redes/associação de terminais em desenvolvimento; CI pendente).
 - [ ] Redes, potenciais e continuidade.
 - [ ] Identificação e numeração de condutores.
 - [ ] Modelos verificados de continuidade interna.
