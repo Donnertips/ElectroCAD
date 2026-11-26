@@ -6,14 +6,16 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 
 - [x] Repositório ElectroCAD existente identificado.
 - [x] Registar commit upstream de referência para auditoria/build experimental (não é ainda a versão de produção; ver `UPSTREAM_BASELINE.md`).
-- [ ] Aprovar versão/commit de produção após comparação com a linha estável e testes de compatibilidade.
+- [x] Comparar a versão estável publicada com a linha Qt6/KF6 (decisão de base registada em UPSTREAM_BASELINE.md; validação de compatibilidade do ElectroCAD continua pendente).
 - [x] Auditoria documental inicial do README, CMakeLists.txt e GPL-2.0 (ver `QELECTROTECH_AUDIT.md`).
 - [x] Identificação documental dos quatro submódulos e das dependências CMake (ver `QELECTROTECH_AUDIT.md`).
 - [ ] Completar auditoria legal de KF6 e dependências transitivas realmente distribuídas; inventário integral do pacote final.
-- [ ] Reproduzir compilação limpa do projeto de origem no workflow do ElectroCAD (workflow criado; execução ainda não validada).
+- [x] Reproduzir compilação limpa do projeto de origem no workflow Windows do ElectroCAD; build, testes unitários e verificação do executável concluídos com sucesso (run 45821375354).
 - [ ] Definir política de branches, tags e releases.
 
 ## Fase 1 — Motor CAD elétrico
+
+Estado: **próxima fase — integração da base QElectroTech 0.200.1 (Qt6/KF6), fixada por SHA e ainda experimental**. A integração só fecha após testes de formatos, regressão e inventário de licenças.
 
 - [ ] Integrar a base CAD auditada.
 - [ ] Editor unifilar e multifilar.
