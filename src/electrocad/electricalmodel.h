@@ -1,8 +1,10 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 #pragma once
 
+#include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace electrocad {
@@ -28,6 +30,23 @@ enum class ConnectionError {
     DuplicateConnection
 };
 
+// A net is an electrical node/network. Three or more assigned terminals
+// represent a branch without implying any device's internal continuity.
+struct ElectricalNet {
+    std::string id;
+    std::vector<TerminalRef> terminals;
+};
+
+enum class NetError {
+    None,
+    EmptyIdentifier,
+    DuplicateNet,
+    UnknownNet,
+    UnknownTerminal,
+    TerminalAlreadyAssigned,
+    TerminalNotAssigned
+};
+
 class ElectricalModel final {
 public:
     bool registerTerminal(const TerminalRef &terminal);
@@ -35,10 +54,19 @@ public:
     bool hasTerminal(const TerminalRef &terminal) const;
     const std::vector<Connection> &connections() const noexcept;
 
+    bool createNet(const std::string &net_id);
+    NetError assignTerminalToNet(const TerminalRef &terminal, const std::string &net_id);
+    NetError removeTerminalFromNet(const TerminalRef &terminal);
+    const ElectricalNet *net(const std::string &net_id) const noexcept;
+    const ElectricalNet *netForTerminal(const TerminalRef &terminal) const noexcept;
+    const std::map<std::string, ElectricalNet> &nets() const noexcept;
+
 private:
     std::set<TerminalRef> terminals_;
     std::set<std::pair<TerminalRef, TerminalRef>> connection_keys_;
     std::vector<Connection> connections_;
+    std::map<std::string, ElectricalNet> nets_;
+    std::map<TerminalRef, std::string> terminal_to_net_;
 };
 
 } // namespace electrocad
