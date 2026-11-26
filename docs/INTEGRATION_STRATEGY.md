@@ -69,4 +69,6 @@ Este núcleo ainda não representa redes, nós com múltiplas derivações, cont
 
 ## Estado
 
-A auditoria estática identificou os alvos CMake e a estratégia de integração. O ponto de entrada CMake e o primeiro módulo próprio já estão no branch de integração. **A compilação hierárquica e os testes integrados ainda não foram confirmados.** O PR #1 está em draft para validação; não foi integrado em `main`. O próximo marco é obter um build Windows verde e corrigir qualquer incompatibilidade do CMake upstream.
+A estratégia de integração e o primeiro módulo próprio foram integrados em `main` através do PR #1 (merge commit `19c51ccc8112ebc0d31fca53dba2ec8949d9abf2`). O workflow Windows associado ao PR #1 foi criado, mas permanece em fila; ainda não há confirmação de configuração CMake, compilação ou testes integrados.
+
+O núcleo atual apenas regista terminais e liga pares de terminais. A compatibilidade CMake hierárquica, o deployment, os recursos/traduções/elementos, e os fluxos de abrir, guardar e exportar continuam por validar. A Fase 1 permanece aberta. O próximo marco é obter um build Windows verde no commit integrado e corrigir incompatibilidades com base nos logs reais, antes de ampliar o modelo elétrico.
