@@ -6,7 +6,8 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 
 - [x] Repositório ElectroCAD existente identificado.
 - [ ] Fixar versão/commit do QElectroTech.
-- [ ] Auditar build, dependências e licenças.
+- [x] Auditoria documental inicial do README, CMakeLists.txt e GPL-2.0 (ver `QELECTROTECH_AUDIT.md`).
+- [ ] Auditoria completa de build, dependências, submódulos e licenças da coleção de elementos.
 - [ ] Reproduzir compilação limpa do projeto de origem.
 - [ ] Definir política de branches, tags e releases.
 
