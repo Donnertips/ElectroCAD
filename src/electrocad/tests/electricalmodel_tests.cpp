@@ -6,6 +6,7 @@
 
 using electrocad::ConnectionError;
 using electrocad::ElectricalModel;
+using electrocad::NetError;
 using electrocad::TerminalRef;
 
 namespace {
@@ -24,10 +25,12 @@ int main()
     const TerminalRef a{"Q1", "1"};
     const TerminalRef b{"Q1", "2"};
     const TerminalRef c{"X1", "1"};
+    const TerminalRef d{"X2", "1"};
 
     require(model.registerTerminal(a), "register first terminal");
     require(model.registerTerminal(b), "register second terminal");
     require(model.registerTerminal(c), "register third terminal");
+    require(model.registerTerminal(d), "register fourth terminal");
     require(!model.registerTerminal(a), "reject duplicate terminal");
     require(!model.registerTerminal({"", "1"}), "reject empty component id");
 
@@ -42,6 +45,41 @@ int main()
     require(model.connect(a, {"", "2"}) == ConnectionError::EmptyIdentifier,
             "reject empty endpoint identifier");
     require(model.connections().size() == 1, "invalid connections do not alter model");
+
+    require(!model.createNet(""), "reject empty net identifier");
+    require(model.createNet("N-001"), "create electrical net");
+    require(!model.createNet("N-001"), "reject duplicate net identifier");
+    require(model.assignTerminalToNet(a, "N-404") == NetError::UnknownNet,
+            "reject assignment to unknown net");
+    require(model.assignTerminalToNet({"Q9", "1"}, "N-001") == NetError::UnknownTerminal,
+            "reject unknown terminal assignment");
+    require(model.assignTerminalToNet(a, "N-001") == NetError::None,
+            "assign first terminal to net");
+    require(model.assignTerminalToNet(b, "N-001") == NetError::None,
+            "assign second terminal to net");
+    require(model.assignTerminalToNet(c, "N-001") == NetError::None,
+            "assign branch terminal to net");
+    require(model.assignTerminalToNet(a, "N-001") == NetError::TerminalAlreadyAssigned,
+            "reject duplicate assignment");
+    require(model.assignTerminalToNet(a, "N-002") == NetError::UnknownNet,
+            "terminal cannot silently move to missing net");
+
+    const auto *net = model.net("N-001");
+    require(net != nullptr, "find net by identifier");
+    require(net->terminals.size() == 3, "net contains three branch terminals");
+    require(model.netForTerminal(b) == net, "resolve net from terminal");
+    require(model.net("N-404") == nullptr, "unknown net returns null");
+    require(model.netForTerminal(d) == nullptr, "unassigned terminal has no net");
+
+    require(model.removeTerminalFromNet(b) == NetError::None,
+            "remove terminal from net");
+    require(model.removeTerminalFromNet(b) == NetError::TerminalNotAssigned,
+            "reject repeated removal");
+    require(model.netForTerminal(b) == nullptr, "removed terminal has no net");
+    require(model.net("N-001")->terminals.size() == 2,
+            "removal updates net membership");
+    require(model.removeTerminalFromNet(d) == NetError::TerminalNotAssigned,
+            "reject removal from no net");
 
     return EXIT_SUCCESS;
 }
