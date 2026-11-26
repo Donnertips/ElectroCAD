@@ -11,18 +11,21 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 - [x] Identificação documental dos quatro submódulos e das dependências CMake (ver `QELECTROTECH_AUDIT.md`).
 - [x] Inventário inicial das dependências declaradas, toolchain Windows e principais famílias de licenças (ver `THIRD_PARTY_NOTICES.md`).
 - [ ] Na fase de distribuição, fixar versões MSYS2, auditar DLLs/runtime efetivamente empacotados e gerar SBOM SPDX final.
-- [x] Reproduzir compilação limpa do projeto de origem no workflow Windows do ElectroCAD; build, testes unitários e verificação do executável concluídos com sucesso (run 45821375354).
+- [x] Reproduzir compilação limpa do projeto de origem no workflow Windows do ElectroCAD; build e testes unitários concluídos no run 45821375354.
 - [x] Definir política de branches, tags e releases (ver `RELEASE_POLICY.md`).
 
-## Fecho da fundação
+## Fase 1 — Integração do motor CAD elétrico
 
-A política de desenvolvimento/release e o inventário preliminar de dependências estão documentados. A auditoria legal específica do instalador e a SBOM final ficam corretamente adiadas para a fase de distribuição, quando os componentes realmente incluídos forem conhecidos. O workflow Windows passa a arquivar também a lista de pacotes MSYS2 instalados.
+Estado: **em curso — estratégia e branch de integração criadas; teste estrutural ainda pendente**. A base upstream permanece experimental.
 
-## Fase 1 — Motor CAD elétrico
-
-Estado: **próxima fase — integração da base QElectroTech 0.200.1 (Qt6/KF6), fixada por SHA e ainda experimental**. A integração só fecha após testes de formatos, regressão e inventário de licenças.
-
-- [ ] Integrar a base CAD auditada.
+- [x] Criar branch de trabalho `feature/qelectrotech-integration`.
+- [x] Auditar o CMake upstream e identificar os alvos `qelectrotech_objects` e `qelectrotech`.
+- [x] Documentar a estratégia de aplicação única e critérios de aceitação (ver `INTEGRATION_STRATEGY.md`).
+- [ ] Validar CMake hierárquico com submódulo upstream fixado.
+- [x] Implementar o primeiro núcleo C++ de terminais e ligações e adicioná-lo ao alvo do executável QElectroTech (validação de build pendente).
+- [ ] Build Windows x64, testes upstream e testes do módulo próprio.
+- [ ] Confirmar deployment de Qt, recursos, traduções, elementos e modelos.
+- [ ] Testar abrir, guardar e exportar projetos de referência.
 - [ ] Editor unifilar e multifilar.
 - [ ] Símbolos com terminais e pontos de ligação.
 - [ ] Ligações terminal-a-terminal, nós e derivações.
