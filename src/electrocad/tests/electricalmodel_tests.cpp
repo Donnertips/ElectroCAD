@@ -48,6 +48,7 @@ int main()
 
     require(!model.createNet(""), "reject empty net identifier");
     require(model.createNet("N-001"), "create electrical net");
+    require(model.createNet("N-002"), "create independent electrical net");
     require(!model.createNet("N-001"), "reject duplicate net identifier");
     require(model.assignTerminalToNet(a, "N-404") == NetError::UnknownNet,
             "reject assignment to unknown net");
@@ -61,8 +62,12 @@ int main()
             "assign branch terminal to net");
     require(model.assignTerminalToNet(a, "N-001") == NetError::TerminalAlreadyAssigned,
             "reject duplicate assignment");
-    require(model.assignTerminalToNet(a, "N-002") == NetError::UnknownNet,
-            "terminal cannot silently move to missing net");
+    require(model.assignTerminalToNet(a, "N-002") == NetError::TerminalAlreadyAssigned,
+            "terminal cannot belong to two networks");
+    require(model.assignTerminalToNet(d, "N-002") == NetError::None,
+            "assign terminal to an independent network");
+    require(model.netForTerminal(d) == model.net("N-002"),
+            "independent network membership is preserved");
 
     const auto *net = model.net("N-001");
     require(net != nullptr, "find net by identifier");
@@ -78,8 +83,10 @@ int main()
     require(model.netForTerminal(b) == nullptr, "removed terminal has no net");
     require(model.net("N-001")->terminals.size() == 2,
             "removal updates net membership");
-    require(model.removeTerminalFromNet(d) == NetError::TerminalNotAssigned,
-            "reject removal from no net");
+    require(model.removeTerminalFromNet(d) == NetError::None,
+            "remove terminal from independent network");
+    require(model.net("N-002")->terminals.empty(),
+            "independent network remains after its terminal is removed");
 
     return EXIT_SUCCESS;
 }
