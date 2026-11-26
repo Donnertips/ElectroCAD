@@ -2,28 +2,44 @@
 
 ## Objetivo
 
-Documentar um ambiente reprodutível para compilar a versão de origem selecionada e, posteriormente, o ElectroCAD.
+Reproduzir de forma controlada a compilação do QElectroTech selecionado e, depois, compilar o ElectroCAD.
 
-## Ferramentas a confirmar
+## Baseline de referência
 
-- Git.
-- CMake compatível com a versão selecionada.
-- Qt na versão exigida pelo commit selecionado.
-- Visual Studio / MSVC x64 compatível.
-- Windows SDK exigido pelas dependências.
+- Repositório upstream: https://github.com/qelectrotech/qelectrotech-source-mirror
+- Commit: `b49ce16c42b99e458e38935f39b919d56582e54e`
+- Toolchain da pipeline upstream validada: Windows x64, MSYS2 UCRT64, MinGW-w64 GCC, CMake, Ninja e Qt 6.
+- Ver [baseline e evidência CI](../docs/UPSTREAM_BASELINE.md).
 
-Não escolher versões arbitrárias antes de confirmar os requisitos do commit.
+## Primeira reprodução automatizada
 
-## Processo previsto
+Foi adicionado o workflow [qelectrotech-upstream-build.yml](../.github/workflows/qelectrotech-upstream-build.yml). Este workflow obtém o commit fixado com submódulos recursivos, instala as dependências no runner Windows, compila, executa testes e publica temporariamente o executável upstream como artefacto de CI.
 
-1. Clonar o repositório de origem e selecionar o commit fixado.
-2. Configurar Qt e compilador segundo a documentação dessa versão.
-3. Configurar com CMake.
-4. Compilar em Release.
-5. Executar os testes disponíveis.
-6. Registar versões, comandos e resultados.
-7. Só depois preparar o pacote/instalador ElectroCAD.
+A criação do workflow está confirmada; a sua execução no repositório ElectroCAD ainda tem de ser observada e validada. A evidência de build bem-sucedida atualmente disponível pertence ao CI oficial do QElectroTech, não ao CI do ElectroCAD.
 
-## Estado atual
+## Toolchain de referência
 
-Ainda não existe neste repositório uma compilação Windows validada. Este documento é um plano, não uma confirmação de ambiente instalado ou build bem-sucedida.
+A pipeline oficial do commit selecionado usa:
+- Windows runner;
+- MSYS2 UCRT64;
+- MinGW-w64 GCC;
+- Qt 6 e Qt6::GuiPrivate;
+- KF6 CoreAddons e WidgetsAddons;
+- SQLite3;
+- CMake e Ninja;
+- QtPdf, Qt Declarative e hidapi.
+
+Esta é a primeira via a reproduzir para reduzir diferenças face ao upstream. O guia upstream também documenta MSVC x64; essa variante será avaliada depois de a referência MinGW estar reproduzida.
+
+## Critérios para considerar a referência validada
+
+1. Checkout do commit SHA exato e dos submódulos recursivos.
+2. Configuração CMake sem erros.
+3. Build Release concluído.
+4. Testes unitários concluídos com sucesso.
+5. Executável presente e com dependências verificadas.
+6. Registo dos logs, versões de ferramentas e hashes dos artefactos.
+
+## Estado
+
+Ainda não existe uma compilação ElectroCAD validada nem um executável ElectroCAD. O artefacto da pipeline de referência, quando produzido, será apenas o executável QElectroTech upstream e não deve ser apresentado como produto ElectroCAD.
