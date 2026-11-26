@@ -10,7 +10,7 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 - [x] Auditoria documental inicial do README, CMakeLists.txt e GPL-2.0 (ver `QELECTROTECH_AUDIT.md`).
 - [x] Identificação documental dos quatro submódulos e das dependências CMake (ver `QELECTROTECH_AUDIT.md`).
 - [ ] Completar auditoria legal de KF6 e dependências transitivas realmente distribuídas; inventário integral do pacote final.
-- [ ] Reproduzir compilação limpa do projeto de origem.
+- [ ] Reproduzir compilação limpa do projeto de origem no workflow do ElectroCAD (workflow criado; execução ainda não validada).
 - [ ] Definir política de branches, tags e releases.
 
 ## Fase 1 — Motor CAD elétrico
