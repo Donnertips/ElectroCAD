@@ -5,10 +5,11 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 ## Fase 0 — Fundação e auditoria
 
 - [x] Repositório ElectroCAD existente identificado.
-- [ ] Fixar versão/commit do QElectroTech.
+- [x] Registar commit upstream de referência para auditoria/build experimental (não é ainda a versão de produção; ver `UPSTREAM_BASELINE.md`).
+- [ ] Aprovar versão/commit de produção após comparação com a linha estável e testes de compatibilidade.
 - [x] Auditoria documental inicial do README, CMakeLists.txt e GPL-2.0 (ver `QELECTROTECH_AUDIT.md`).
 - [x] Identificação documental dos quatro submódulos e das dependências CMake (ver `QELECTROTECH_AUDIT.md`).
-- [ ] Auditoria integral dos submódulos e licenças, incluindo a coleção de elementos.
+- [ ] Completar auditoria legal de KF6 e dependências transitivas realmente distribuídas; inventário integral do pacote final.
 - [ ] Reproduzir compilação limpa do projeto de origem.
 - [ ] Definir política de branches, tags e releases.
 
