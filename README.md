@@ -8,12 +8,13 @@ O ElectroCAD será desenvolvido a partir de uma auditoria e adaptação do QElec
 
 ## Estado
 
-**Preparação do repositório.** Este repositório ainda não contém uma aplicação ElectroCAD compilável nem uma integração do código-fonte do QElectroTech.
+**Integração em validação.** Existe agora um núcleo C++ inicial para registo de terminais e ligações, ligado no CMake ao alvo do executável QElectroTech. O build integrado e os testes ainda aguardam confirmação no CI; não existe ainda um executável ElectroCAD validado.
 
 ## Arquitetura prevista
 
-- Motor CAD: QElectroTech (C++ / Qt), após auditoria técnica e de licenças.
+- Motor CAD: QElectroTech (C++ / Qt), com commit fixado e estratégia de integração documentada.
 - Módulos próprios: engenharia elétrica, equipamentos, bornes/cablagem, layout, documentação e gestão.
+- Objetivo de produto: uma única aplicação integrada, não um conjunto de programas separados.
 - Dados de projeto: preservar compatibilidade e definir migrações antes de alterar formatos existentes.
 - Plataforma alvo inicial: Windows 64-bit.
 
@@ -21,6 +22,7 @@ O ElectroCAD será desenvolvido a partir de uma auditoria e adaptação do QElec
 
 - [Auditoria técnica do QElectroTech](docs/QELECTROTECH_AUDIT.md)
 - [Baseline upstream e commits fixados](docs/UPSTREAM_BASELINE.md)
+- [Estratégia de integração](docs/INTEGRATION_STRATEGY.md)
 - [Workflow de compilação de referência](.github/workflows/qelectrotech-upstream-build.yml)
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Plano de desenvolvimento](docs/ROADMAP.md)
