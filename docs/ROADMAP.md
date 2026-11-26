@@ -9,9 +9,14 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 - [x] Comparar a versão estável publicada com a linha Qt6/KF6 (decisão de base registada em UPSTREAM_BASELINE.md; validação de compatibilidade do ElectroCAD continua pendente).
 - [x] Auditoria documental inicial do README, CMakeLists.txt e GPL-2.0 (ver `QELECTROTECH_AUDIT.md`).
 - [x] Identificação documental dos quatro submódulos e das dependências CMake (ver `QELECTROTECH_AUDIT.md`).
-- [ ] Completar auditoria legal de KF6 e dependências transitivas realmente distribuídas; inventário integral do pacote final.
+- [x] Inventário inicial das dependências declaradas, toolchain Windows e principais famílias de licenças (ver `THIRD_PARTY_NOTICES.md`).
+- [ ] Na fase de distribuição, fixar versões MSYS2, auditar DLLs/runtime efetivamente empacotados e gerar SBOM SPDX final.
 - [x] Reproduzir compilação limpa do projeto de origem no workflow Windows do ElectroCAD; build, testes unitários e verificação do executável concluídos com sucesso (run 45821375354).
-- [ ] Definir política de branches, tags e releases.
+- [x] Definir política de branches, tags e releases (ver `RELEASE_POLICY.md`).
+
+## Fecho da fundação
+
+A política de desenvolvimento/release e o inventário preliminar de dependências estão documentados. A auditoria legal específica do instalador e a SBOM final ficam corretamente adiadas para a fase de distribuição, quando os componentes realmente incluídos forem conhecidos. O workflow Windows passa a arquivar também a lista de pacotes MSYS2 instalados.
 
 ## Fase 1 — Motor CAD elétrico
 
