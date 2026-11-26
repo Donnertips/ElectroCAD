@@ -24,6 +24,7 @@ O ElectroCAD será desenvolvido a partir de uma auditoria e adaptação do QElec
 - [Workflow de compilação de referência](.github/workflows/qelectrotech-upstream-build.yml)
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Plano de desenvolvimento](docs/ROADMAP.md)
+- [Política de branches, versões e releases](docs/RELEASE_POLICY.md)
 - [Avisos de terceiros e licenças](THIRD_PARTY_NOTICES.md)
 - [Ambiente Windows](build-windows/README.md)
 
