@@ -104,3 +104,28 @@ Ver `docs/UPSTREAM_BASELINE.md` e `THIRD_PARTY_NOTICES.md` para detalhes e SHAs.
 ### Estado atualizado
 
 A auditoria documental dos submódulos e do baseline está substancialmente avançada. Não foi feito clone recursivo local, não foi executada compilação no repositório ElectroCAD e não foi gerado executável ElectroCAD. A seleção de produção e a reprodução independente do build continuam abertas.
+
+
+## Terceira ronda — baseline fixado e evidência CI
+
+A árvore Git do commit upstream `b49ce16c42b99e458e38935f39b919d56582e54e` foi consultada diretamente. Os gitlinks dos quatro submódulos estão registados em `UPSTREAM_BASELINE.md`, juntamente com os SHAs exatos e as licenças identificadas.
+
+O commit `b49ce16c42b99e458e38935f39b919d56582e54e` é agora a referência técnica para a primeira reprodução e integração experimental, não uma decisão definitiva de versão de produção. O commit tem versão CMake 0.200.1 e corresponde à linha de desenvolvimento/nightly.
+
+Foi confirmada a execução bem-sucedida da pipeline oficial Windows Build para este SHA (run 45806034743), incluindo checkout recursivo, CMake, Ninja, testes unitários, verificação do executável e empacotamento. A pipeline Windows MSI (run 45810890238) também terminou com sucesso. A execução Linux build e testes (run 45791966123) terminou com sucesso. O release upstream publicou instalador Windows x64 para o mesmo commit. Esta evidência pertence ao CI upstream e não equivale a uma compilação do ElectroCAD.
+
+O guia INSTALL.md documenta MSVC e MinGW, mas a pipeline Windows de referência usa MSYS2 UCRT64/MinGW-w64. A primeira reprodução deve utilizar o mesmo toolchain para reduzir diferenças.
+
+### Licenças de submódulos identificadas
+
+- pugixml: MIT.
+- SingleApplication: licença permissiva com cláusula expressa de atribuição/inclusão da licença; exemplos com nota própria.
+- doxygen-awesome-css: MIT.
+- Coleção de elementos: licença própria ELEMENTS.LICENSE, com permissão para integração em esquemas elétricos e CC BY 3.0 para redistribuição fora de esquemas.
+- KF6: licenças dos commits efetivamente distribuídos e dependências transitivas ainda carecem de inventário.
+
+Ver `docs/UPSTREAM_BASELINE.md` e `THIRD_PARTY_NOTICES.md` para detalhes e SHAs.
+
+### Estado atualizado
+
+A auditoria documental dos submódulos e do baseline está substancialmente avançada. Não foi feito clone recursivo local, não foi executada compilação no repositório ElectroCAD e não foi gerado executável ElectroCAD. A seleção de produção e a reprodução independente do build continuam abertas.
