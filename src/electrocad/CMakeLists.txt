@@ -6,28 +6,23 @@ add_library(electrocad_core OBJECT
 target_compile_features(electrocad_core PUBLIC cxx_std_17)
 target_include_directories(electrocad_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# QElectroTech adapter is kept separate so the standalone model tests do not
-# pull the full upstream object library into their link.
-add_library(electrocad_qet_integration OBJECT
+# Compile the adapter as part of QElectroTech's own object library. This
+# deliberately inherits the exact include paths, compile definitions and
+# dependency usage requirements established by the pinned upstream project.
+# A separate target cannot safely assume that every Qt imported target is
+# globally available in all supported QElectroTech/MSYS2 configurations.
+target_sources(qelectrotech_objects PRIVATE
     qetdiagramadapter.cpp
     qetdiagramadapter.h
 )
-target_compile_features(electrocad_qet_integration PUBLIC cxx_std_17)
-target_include_directories(electrocad_qet_integration PRIVATE
+target_include_directories(qelectrotech_objects PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${ELECTROCAD_UPSTREAM_SOURCE_DIR}/sources
-)
-target_link_libraries(electrocad_qet_integration PRIVATE
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
 )
 
-# Compile both ElectroCAD layers directly into the single QElectroTech-based
+# Compile the ElectroCAD core directly into the single QElectroTech-based
 # application executable. No second application is produced.
 target_sources(qelectrotech PRIVATE
     $<TARGET_OBJECTS:electrocad_core>
-    $<TARGET_OBJECTS:electrocad_qet_integration>
 )
 
 include(CTest)
