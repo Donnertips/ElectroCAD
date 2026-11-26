@@ -52,6 +52,13 @@ jobs:
             mingw-w64-ucrt-x86_64-qt6-declarative
             mingw-w64-ucrt-x86_64-hidapi
 
+      - name: Record installed MSYS2 package versions
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+          pacman -Q | sort > "$GITHUB_WORKSPACE/msys2-packages.txt"
+          echo "Recorded $(wc -l < "$GITHUB_WORKSPACE/msys2-packages.txt") installed packages"
+
       - name: Verify source and submodule revisions
         shell: msys2 {0}
         run: |
@@ -114,6 +121,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: qelectrotech-upstream-reference-win64
-          path: upstream/build/**/qelectrotech.exe
+          path: |
+            upstream/build/**/qelectrotech.exe
+            msys2-packages.txt
           if-no-files-found: error
           retention-days: 7
