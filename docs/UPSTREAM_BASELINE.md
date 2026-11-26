@@ -87,3 +87,33 @@ O guia INSTALL.md também documenta um caminho MSVC, mas a pipeline oficial bem-
 - Executar testes de regressão de abertura/guarda dos formatos QET.
 - Completar o inventário de licenças de KF6 e das dependências transitivas efetivamente distribuídas.
 - Definir estratégia de integração: fork/subtree/submodule ou upstream remoto fixado. Não copiar código para o repositório ElectroCAD antes de fechar esta decisão.
+
+
+## Comparação de versões e decisão de base — 26-11-2026
+
+- A página oficial de downloads identifica a versão estável publicada como **0.100 (25-01-2026)**, baseada em Qt5. A própria página informa que as compilações Qt5/KF5 chegaram ao fim de vida.
+- A linha atual de desenvolvimento é **0.200.1-dev**, baseada em Qt6 + KDE Frameworks 6, com builds automáticos e aviso explícito de que pode conter bugs ainda não identificados.
+- A proposta de publicar 0.200.2 como estável foi discutida na issue upstream #1112, mas foi adiada; a issue confirma que os builds nightly continuam a ser a via para obter a versão Qt6 mais recente.
+- As notas de migração 0.100 → master documentam a migração completa para Qt6/KF6 e várias melhorias funcionais relevantes (numeração, edição geométrica, ferramentas de desenho e produtividade).
+
+**Decisão técnica para o ElectroCAD:** prosseguir com o commit fixado b49ce16c42b99e458e38935f39b919d56582e54e (0.200.1, Qt6/KF6) como base de integração experimental. Não retroceder para 0.100/Qt5: é a versão estável publicada, mas a stack Qt5/KF5 está declarada EOL e obrigaria a uma migração tecnológica posterior. Esta escolha não significa que 0.200.1 seja uma versão upstream estável ou que esteja pronta para produção. O SHA permanece fixo para reprodutibilidade; a aceitação de produção depende de testes ElectroCAD, auditoria legal completa e acompanhamento de uma futura release Qt6 estável.
+
+Fontes:
+- Página oficial de downloads: https://qelectrotech.org/download.php
+- Issue upstream #1112 (0.200.2 adiada): https://github.com/qelectrotech/qelectrotech-source-mirror/issues/1112
+- Notas de migração 0.100 → master: https://github.com/qelectrotech/qelectrotech-source-mirror/blob/master/QET_release_notes_0.100_to_master.md
+
+## Reprodução Windows no repositório ElectroCAD
+
+- Workflow: https://github.com/Donnertips/ElectroCAD/actions/runs/45821375354
+- Job: Windows x64 reference build (MSYS2 UCRT64) — **success**.
+- Checkout do ElectroCAD e checkout recursivo do upstream: sucesso.
+- Instalação MSYS2/toolchain/dependências: sucesso.
+- Verificação dos SHAs de origem e submódulos: sucesso.
+- CMake configure: sucesso.
+- Build Ninja: sucesso.
+- Testes unitários: sucesso.
+- Verificação do executável: sucesso.
+- Upload do artefacto qelectrotech-upstream-reference-win64: sucesso; 14 474 352 bytes.
+
+O artefacto é o executável de referência QElectroTech produzido pelo workflow, não uma aplicação ElectroCAD modificada. Não distribuir nem identificar como ElectroCAD.
