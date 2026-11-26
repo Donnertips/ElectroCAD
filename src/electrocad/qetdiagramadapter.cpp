@@ -64,6 +64,7 @@ ElectricalModel QetDiagramAdapter::buildModel(const Diagram &diagram)
     }
 
     std::vector<std::size_t> parent(references.size());
+    std::vector<bool> connected(references.size(), false);
     std::iota(parent.begin(), parent.end(), std::size_t{0});
 
     const auto findRoot = [&parent](std::size_t index) {
@@ -96,6 +97,9 @@ ElectricalModel QetDiagramAdapter::buildModel(const Diagram &diagram)
             continue;
         }
 
+        connected[first->second] = true;
+        connected[second->second] = true;
+
         const std::size_t firstRoot = findRoot(first->second);
         const std::size_t secondRoot = findRoot(second->second);
         if (firstRoot != secondRoot) {
@@ -105,17 +109,9 @@ ElectricalModel QetDiagramAdapter::buildModel(const Diagram &diagram)
 
     std::map<std::size_t, std::vector<TerminalRef>> connectedGroups;
     for (std::size_t index = 0; index < references.size(); ++index) {
-        const auto *net = model.netForTerminal(references[index]);
-        (void)net;
         // A terminal belongs to a generated net only if at least one
         // explicit conductor touches its connected component.
-        const bool hasConductor = std::any_of(
-            model.connections().begin(), model.connections().end(),
-            [&references, index](const Connection &connection) {
-                return connection.from == references[index]
-                    || connection.to == references[index];
-            });
-        if (hasConductor) {
+        if (connected[index]) {
             connectedGroups[findRoot(index)].push_back(references[index]);
         }
     }
