@@ -1,18 +1,30 @@
-name: QElectroTech upstream reference build
+name: QElectroTech integration build
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches: [main]
     paths:
+      - "CMakeLists.txt"
+      - "src/electrocad/**"
       - ".github/workflows/qelectrotech-upstream-build.yml"
+      - "docs/INTEGRATION_STRATEGY.md"
+  push:
+    branches:
+      - main
+      - feature/qelectrotech-integration
+    paths:
+      - "CMakeLists.txt"
+      - "src/electrocad/**"
+      - ".github/workflows/qelectrotech-upstream-build.yml"
+      - "docs/INTEGRATION_STRATEGY.md"
 
 permissions:
   contents: read
 
 jobs:
-  windows-reference:
-    name: Windows x64 reference build (MSYS2 UCRT64)
+  windows-integration:
+    name: Windows x64 integration build (MSYS2 UCRT64)
     runs-on: windows-latest
     steps:
       - name: Checkout ElectroCAD
@@ -67,36 +79,23 @@ jobs:
           test "$(git rev-parse HEAD)" = "b49ce16c42b99e458e38935f39b919d56582e54e"
           git submodule status --recursive
 
-      - name: Configure QElectroTech
+      - name: Configure ElectroCAD integration tree
         shell: msys2 {0}
         run: |
           set -euo pipefail
-          cd "$GITHUB_WORKSPACE/upstream"
-          mkdir build
-          cd build
-          cmake -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH=/ucrt64 \
-            -DQt6_DIR=/ucrt64/lib/cmake/Qt6 \
-            -DQT_VERSION_MAJOR=6 \
-            -DBUILD_WITH_KF=ON \
-            -DBUILD_KF=OFF \
-            -DPACKAGE_TESTS=ON \
-            -DCMAKE_POLICY_DEFAULT_CMP0077=NEW \
-            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-            -DQET_EXPORT_PROJECT_DB=ON \
-            -DQET_ENABLE_SPACEMOUSE=ON \
-            -DQET_SPACEMOUSE_BACKEND=hid \
-            -DSQLite3_INCLUDE_DIR=/ucrt64/include \
-            -DSQLite3_LIBRARY=/ucrt64/lib/libsqlite3.dll.a \
-            ..
+          cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -G Ninja             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_PREFIX_PATH=/ucrt64             -DQt6_DIR=/ucrt64/lib/cmake/Qt6             -DQT_VERSION_MAJOR=6             -DBUILD_WITH_KF=ON             -DBUILD_KF=OFF             -DPACKAGE_TESTS=ON             -DCMAKE_POLICY_DEFAULT_CMP0077=NEW             -DCMAKE_POLICY_VERSION_MINIMUM=3.5             -DQET_EXPORT_PROJECT_DB=ON             -DQET_ENABLE_SPACEMOUSE=ON             -DQET_SPACEMOUSE_BACKEND=hid             -DSQLite3_INCLUDE_DIR=/ucrt64/include             -DSQLite3_LIBRARY=/ucrt64/lib/libsqlite3.dll.a
+
+      - name: Verify integrated application target
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+          cmake --build "$GITHUB_WORKSPACE/build" --target help | grep -E 'qelectrotech(_objects)?'
 
       - name: Build
         shell: msys2 {0}
         run: |
           set -euo pipefail
-          cd "$GITHUB_WORKSPACE/upstream/build"
-          ninja -j"$(nproc)"
+          cmake --build "$GITHUB_WORKSPACE/build" --parallel "$(nproc)"
 
       - name: Run unit tests
         shell: msys2 {0}
@@ -104,25 +103,24 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           set -euo pipefail
-          cd "$GITHUB_WORKSPACE/upstream/build"
-          ctest --output-on-failure --timeout 900
+          ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure --timeout 900
 
       - name: Verify executable
         shell: msys2 {0}
         run: |
           set -euo pipefail
-          exe="$(find "$GITHUB_WORKSPACE/upstream/build" -maxdepth 3 -iname qelectrotech.exe | head -1)"
+          exe="$(find "$GITHUB_WORKSPACE/build" -maxdepth 5 -iname qelectrotech.exe | head -1)"
           test -n "$exe"
           test "$(stat -c%s "$exe")" -gt 100000
-          echo "Reference executable: $exe"
+          echo "Integrated build executable: $exe"
           echo "Size: $(stat -c%s "$exe") bytes"
 
-      - name: Upload reference executable
+      - name: Upload integration test artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: qelectrotech-upstream-reference-win64
+          name: electrocad-qelectrotech-integration-win64
           path: |
-            upstream/build/**/qelectrotech.exe
+            build/**/qelectrotech.exe
             msys2-packages.txt
           if-no-files-found: error
           retention-days: 7
