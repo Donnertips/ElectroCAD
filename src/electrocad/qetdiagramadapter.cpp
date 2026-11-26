@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <map>
 #include <numeric>
+#include <QString>
+#include <QUuid>
 #include <utility>
 #include <vector>
 
