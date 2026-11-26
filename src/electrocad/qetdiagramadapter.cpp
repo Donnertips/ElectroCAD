@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <map>
 #include <numeric>
+#include <utility>
 #include <vector>
 
 namespace electrocad {
