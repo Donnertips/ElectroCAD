@@ -69,6 +69,10 @@ Este núcleo ainda não representa redes, nós com múltiplas derivações, cont
 
 ## Estado
 
-A estratégia de integração e o primeiro módulo próprio foram integrados em `main` através do PR #1 (merge commit `19c51ccc8112ebc0d31fca53dba2ec8949d9abf2`). O workflow Windows associado ao PR #1 foi criado, mas permanece em fila; ainda não há confirmação de configuração CMake, compilação ou testes integrados.
+A estratégia de integração e o primeiro módulo próprio foram integrados em `main` através do PR #1 (merge commit `19c51ccc8112ebc0d31fca53dba2ec8949d9abf2`). O workflow Windows do ElectroCAD no commit `49cef6c21e89a25895ecf14656e52d1b5acfd2d5` concluiu com sucesso: checkout upstream/submódulos, configuração CMake hierárquica, verificação do alvo integrado, build, testes unitários e verificação do executável. Run: https://github.com/Donnertips/ElectroCAD/actions/runs/45869976768.
 
-O núcleo atual apenas regista terminais e liga pares de terminais. A compatibilidade CMake hierárquica, o deployment, os recursos/traduções/elementos, e os fluxos de abrir, guardar e exportar continuam por validar. A Fase 1 permanece aberta. O próximo marco é obter um build Windows verde no commit integrado e corrigir incompatibilidades com base nos logs reais, antes de ampliar o modelo elétrico.
+O artefacto `electrocad-qelectrotech-integration-win64` é um artefacto de CI (14 483 505 bytes), não um instalador de produção. O workflow ainda não demonstra deployment completo de Qt, recursos, traduções, elementos e modelos, nem os fluxos funcionais de abrir, guardar e exportar.
+
+A integração CMake hierárquica está validada no workflow atual, mas o checkout upstream ainda é feito num passo separado do CI; a adoção do submódulo Git `external/qelectrotech` prevista na estratégia continua pendente. O núcleo inicial de terminais/ligações compila e os testes passam.
+
+A evolução em curso acrescenta redes elétricas nomeadas e associação de vários terminais a uma rede, incluindo derivações. Esta representação de topologia não presume continuidade interna de aparelhos, nem substitui ainda o editor gráfico de fios/nós. A Fase 1 permanece aberta até validação funcional, deployment e integração com os documentos do QElectroTech.
