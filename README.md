@@ -19,6 +19,7 @@ O ElectroCAD será desenvolvido a partir de uma auditoria e adaptação do QElec
 
 ## Documentação
 
+- [Auditoria inicial do QElectroTech](docs/QELECTROTECH_AUDIT.md)
 - [Arquitetura](docs/ARCHITECTURE.md)
 - [Plano de desenvolvimento](docs/ROADMAP.md)
 - [Avisos de terceiros e licenças](THIRD_PARTY_NOTICES.md)
