@@ -53,7 +53,7 @@ O ficheiro `.gitmodules` do upstream (blob `82164f390f469e581af81ac95c759958323e
 | `elements` | https://github.com/qelectrotech/qelectrotech-elements | Coleção oficial de elementos do QElectroTech |
 | `doxygen-awesome-css` | https://github.com/jothepro/doxygen-awesome-css | Estilos da documentação Doxygen |
 
-A coleção `qelectrotech-elements` tem um README que a identifica como coleção oficial de elementos, mas não foi encontrado um ficheiro `LICENSE` nem `COPYING` na raiz consultada. Isto não prova que todos os elementos estejam sem licença; significa que a licença e os direitos de redistribuição continuam por esclarecer através dos metadados e avisos internos da coleção. Não incorporar nem redistribuir essa coleção no pacote ElectroCAD até concluir essa verificação.
+A coleção `qelectrotech-elements` tem um ficheiro próprio `ELEMENTS.LICENSE`. Este permite usar, editar e integrar os elementos em esquemas elétricos sem condição, independentemente da licença final dos esquemas. A redistribuição da coleção, ou de parte dela, fora de um esquema elétrico está sujeita a CC BY 3.0 e atribuição. O ficheiro também proíbe utilizar os elementos como dados de amostra para construir modelos de aprendizagem automática. A licença e o âmbito devem ser respeitados na distribuição do ElectroCAD.
 
 ### Dependências descobertas no CMake
 
@@ -79,3 +79,28 @@ Manter QElectroTech como candidato a motor do editor e preservar os seus formato
 ### Limites da verificação
 
 Esta ronda foi uma inspeção documental dos ficheiros acessíveis pela API do GitHub. Não equivale a clone recursivo, inspeção de todos os ficheiros/submódulos, análise de licença elemento a elemento ou compilação. Nenhum build ou executável foi produzido nesta etapa.
+
+
+## Terceira ronda — baseline fixado e evidência CI
+
+A árvore Git do commit upstream `b49ce16c42b99e458e38935f39b919d56582e54e` foi consultada diretamente. Os gitlinks dos quatro submódulos estão registados em `UPSTREAM_BASELINE.md`, juntamente com os SHAs exatos e as licenças identificadas.
+
+O commit `b49ce16c42b99e458e38935f39b919d56582e54e` é agora a referência técnica para a primeira reprodução e integração experimental, não uma decisão definitiva de versão de produção. O commit tem versão CMake 0.200.1 e corresponde à linha de desenvolvimento/nightly.
+
+Foi confirmada a execução bem-sucedida da pipeline oficial Windows Build para este SHA (run 45806034743), incluindo checkout recursivo, CMake, Ninja, testes unitários, verificação do executável e empacotamento. A pipeline Windows MSI (run 45810890238) também terminou com sucesso. A execução Linux build e testes (run 45791966123) terminou com sucesso. O release upstream publicou instalador Windows x64 para o mesmo commit. Esta evidência pertence ao CI upstream e não equivale a uma compilação do ElectroCAD.
+
+O guia INSTALL.md documenta MSVC e MinGW, mas a pipeline Windows de referência usa MSYS2 UCRT64/MinGW-w64. A primeira reprodução deve utilizar o mesmo toolchain para reduzir diferenças.
+
+### Licenças de submódulos identificadas
+
+- pugixml: MIT.
+- SingleApplication: licença permissiva com cláusula expressa de atribuição/inclusão da licença; exemplos com nota própria.
+- doxygen-awesome-css: MIT.
+- Coleção de elementos: licença própria ELEMENTS.LICENSE, com permissão para integração em esquemas elétricos e CC BY 3.0 para redistribuição fora de esquemas.
+- KF6: licenças dos commits efetivamente distribuídos e dependências transitivas ainda carecem de inventário.
+
+Ver `docs/UPSTREAM_BASELINE.md` e `THIRD_PARTY_NOTICES.md` para detalhes e SHAs.
+
+### Estado atualizado
+
+A auditoria documental dos submódulos e do baseline está substancialmente avançada. Não foi feito clone recursivo local, não foi executada compilação no repositório ElectroCAD e não foi gerado executável ElectroCAD. A seleção de produção e a reprodução independente do build continuam abertas.
