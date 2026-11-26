@@ -17,6 +17,11 @@ target_include_directories(electrocad_qet_integration PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${ELECTROCAD_UPSTREAM_SOURCE_DIR}/sources
 )
+target_link_libraries(electrocad_qet_integration PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+)
 
 # Compile both ElectroCAD layers directly into the single QElectroTech-based
 # application executable. No second application is produced.
