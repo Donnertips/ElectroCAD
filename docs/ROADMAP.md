@@ -16,7 +16,7 @@ As fases são sequenciais. Uma fase só fecha depois de implementação, testes 
 
 ## Fase 1 — Integração do motor CAD elétrico
 
-Estado: **em curso — integração CMake e build Windows x64 validados no CI do commit `49cef6c21e89a25895ecf14656e52d1b5acfd2d5`; a base upstream permanece experimental.**
+Estado: **em curso — integração CMake, modelo de redes e derivações validados em CI Windows; adaptador de leitura do diagrama QET em desenvolvimento. A base upstream permanece experimental.**
 
 - [x] Criar branch de trabalho `feature/qelectrotech-integration`.
 - [x] Auditar o CMake upstream e identificar os alvos `qelectrotech_objects` e `qelectrotech`.
@@ -28,8 +28,9 @@ Estado: **em curso — integração CMake e build Windows x64 validados no CI do
 - [ ] Testar abrir, guardar e exportar projetos de referência.
 - [ ] Editor unifilar e multifilar.
 - [ ] Símbolos com terminais e pontos de ligação.
-- [ ] Ligações terminal-a-terminal, nós e derivações (API inicial de redes/associação de terminais em desenvolvimento; CI pendente).
-- [ ] Redes, potenciais e continuidade.
+- [x] Modelo de ligações, redes e derivações; CI Windows aprovado no run 45881881930.
+- [ ] Adaptador de leitura da topologia a partir dos objetos nativos Diagram/Element/Terminal/Conductor (implementado no PR seguinte; CI pendente).
+- [ ] Potenciais e continuidade elétrica, incluindo distinção entre condutores explícitos e continuidade interna validada de aparelhos.
 - [ ] Identificação e numeração de condutores.
 - [ ] Modelos verificados de continuidade interna.
 - [ ] Bobinas/contactos e referências cruzadas.
