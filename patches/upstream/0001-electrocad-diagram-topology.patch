@@ -1,36 +1,38 @@
 diff --git a/sources/diagramview.h b/sources/diagramview.h
 --- a/sources/diagramview.h
 +++ b/sources/diagramview.h
-@@ -27,6 +27,7 @@ class CellRuler;
+@@ -23,6 +23,7 @@
+ class CellRuler;
  class Conductor;
  class Diagram;
 +namespace electrocad { class QetDiagramTopology; }
  class DiagramContextToolbar;
  class DiagramGestureOverlay;
  class QETDiagramEditor;
-@@ -51,6 +52,7 @@
- 		// attributes
+@@ -47,6 +48,7 @@
  
- 		Diagram          *m_diagram = nullptr;
-+		electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
- 		DVEventInterface *m_event_interface = nullptr;
- 		QAction          *m_paste_here = nullptr;
-@@ -151,5 +153,6 @@
- 		QString title() const;
- 		void editDiagramProperties();
- 		Diagram *diagram() { return(m_diagram); }
-+		electrocad::QetDiagramTopology *electricalTopology() const { return m_electrocad_topology; }
- 		QETDiagramEditor *diagramEditor() const;
- 		void editSelection();
+ 	Diagram          *m_diagram = nullptr;
++	electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
+ 	DVEventInterface *m_event_interface = nullptr;
+ 	QAction          *m_paste_here = nullptr;
+ 	QAction			 *m_multi_paste = nullptr;
+@@ -148,6 +150,7 @@
+ 	QString title() const;
+ 	void editDiagramProperties();
+ 	Diagram *diagram() { return(m_diagram); }
++	electrocad::QetDiagramTopology *electricalTopology() const { return m_electrocad_topology; }
+ 	QETDiagramEditor *diagramEditor() const;
+ 	void editSelection();
 diff --git a/sources/diagramview.cpp b/sources/diagramview.cpp
-index 0000000..0000000 100644
 --- a/sources/diagramview.cpp
 +++ b/sources/diagramview.cpp
-@@ -18,2 +18,3 @@
+@@ -16,6 +16,7 @@
+ */
  #include "diagramview.h"
 +#include "qetdiagramtopology.h"
  #include "itemdescription.h"
-@@ -94,4 +95,5 @@
+ #include "shownkinds.h"
+@@ -119,6 +120,7 @@
  	setRenderHint(QPainter::SmoothPixmapTransform, true);
  
  	setScene(m_diagram);
