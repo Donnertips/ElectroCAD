@@ -5,7 +5,7 @@ index 0000000..0000000 100644
 @@ -27,6 +27,7 @@ class CellRuler;
  class Conductor;
  class Diagram;
-+class QetDiagramTopology;
++namespace electrocad { class QetDiagramTopology; }
  class DiagramContextToolbar;
  class DiagramGestureOverlay;
  class QETDiagramEditor;
