@@ -1,5 +1,4 @@
 diff --git a/sources/diagramview.h b/sources/diagramview.h
-index 0000000..0000000 100644
 --- a/sources/diagramview.h
 +++ b/sources/diagramview.h
 @@ -27,6 +27,7 @@ class CellRuler;
