@@ -7,20 +7,32 @@ diff --git a/sources/diagramview.h b/sources/diagramview.h
  class Diagram;
 +namespace electrocad { class QetDiagramTopology; }
  class DiagramContextToolbar;
-@@ -63,1 +64,2 @@
+@@ -61,5 +62,6 @@
+ 		// attributes
+ 
  		Diagram          *m_diagram = nullptr;
 +		electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
-@@ -162,1 +163,2 @@
+ 		DVEventInterface *m_event_interface = nullptr;
+ 		QAction          *m_paste_here = nullptr;
+@@ -162,4 +163,5 @@
+ 		QString title() const;
+ 		void editDiagramProperties();
  		Diagram *diagram() { return(m_diagram); }
 +		electrocad::QetDiagramTopology *electricalTopology() const { return m_electrocad_topology; }
+ 		QETDiagramEditor *diagramEditor() const;
+ 		void editSelection();
 diff --git a/sources/diagramview.cpp b/sources/diagramview.cpp
 --- a/sources/diagramview.cpp
 +++ b/sources/diagramview.cpp
-@@ -18,3 +18,4 @@
+@@ -18,4 +18,5 @@
  #include "diagramview.h"
  #include "itemdescription.h"
  #include "shownkinds.h"
 +#include "qetdiagramtopology.h"
-@@ -138,1 +139,2 @@
+ #include "autoNum/ui/pastenumberingimport.h"
+@@ -136,4 +137,5 @@
+ 	setRenderHint(QPainter::SmoothPixmapTransform, true);
+ 
  	setScene(m_diagram);
 +	m_electrocad_topology = m_diagram ? new electrocad::QetDiagramTopology(*m_diagram, this) : nullptr;
+ 	m_diagram -> undoStack().setClean();
