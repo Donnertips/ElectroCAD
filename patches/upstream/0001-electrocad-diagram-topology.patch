@@ -27,7 +27,7 @@ diff --git a/sources/diagramview.cpp b/sources/diagramview.cpp
 index 0000000..0000000 100644
 --- a/sources/diagramview.cpp
 +++ b/sources/diagramview.cpp
-@@ -20,6 +20,7 @@
+@@ -18,2 +18,3 @@
  #include "diagramview.h"
 +#include "qetdiagramtopology.h"
  #include "itemdescription.h"
