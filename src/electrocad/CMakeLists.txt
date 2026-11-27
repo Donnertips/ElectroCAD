@@ -17,6 +17,8 @@ target_sources(qelectrotech_objects PRIVATE
     electricalmodel.h
     qetdiagramadapter.cpp
     qetdiagramadapter.h
+    qetdiagramtopology.cpp
+    qetdiagramtopology.h
 )
 target_include_directories(qelectrotech_objects PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
