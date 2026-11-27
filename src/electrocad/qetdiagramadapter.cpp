@@ -82,8 +82,7 @@ ElectricalModel QetDiagramAdapter::buildModel(const Diagram &diagram)
     // Junctions/branches naturally become connected components of this
     // graph. No continuity is inferred through a component's other pins.
     for (Conductor *conductor : diagram.conductors()) {
-        if (!conductor || !conductor->isValid()
-            || !conductor->terminal1 || !conductor->terminal2) {
+        if (!conductor || !conductor->terminal1 || !conductor->terminal2) {
             continue;
         }
 
