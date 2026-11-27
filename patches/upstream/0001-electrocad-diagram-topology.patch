@@ -9,14 +9,14 @@ diff --git a/sources/diagramview.h b/sources/diagramview.h
  class DiagramContextToolbar;
  class DiagramGestureOverlay;
  class QETDiagramEditor;
-@@ -47,6 +48,7 @@
+@@ -47,5 +48,6 @@
  
  	Diagram          *m_diagram = nullptr;
 +	electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
  	DVEventInterface *m_event_interface = nullptr;
  	QAction          *m_paste_here = nullptr;
  	QAction			 *m_multi_paste = nullptr;
-@@ -148,6 +150,7 @@
+@@ -148,5 +150,6 @@
  	QString title() const;
  	void editDiagramProperties();
  	Diagram *diagram() { return(m_diagram); }
@@ -26,13 +26,13 @@ diff --git a/sources/diagramview.h b/sources/diagramview.h
 diff --git a/sources/diagramview.cpp b/sources/diagramview.cpp
 --- a/sources/diagramview.cpp
 +++ b/sources/diagramview.cpp
-@@ -16,6 +16,7 @@
+@@ -16,4 +16,5 @@
  */
  #include "diagramview.h"
 +#include "qetdiagramtopology.h"
  #include "itemdescription.h"
  #include "shownkinds.h"
-@@ -119,6 +120,7 @@
+@@ -119,4 +120,5 @@
  	setRenderHint(QPainter::SmoothPixmapTransform, true);
  
  	setScene(m_diagram);
