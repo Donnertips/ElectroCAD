@@ -2,15 +2,13 @@
 
 ## Estado
 
-A estratégia de integração está documentada em [INTEGRATION_STRATEGY.md](INTEGRATION_STRATEGY.md). A integração do código ainda não foi executada nem validada num build hierárquico.
+A integração CMake hierárquica do QElectroTech e os módulos iniciais ElectroCAD estão compilados e validados em CI Windows x64. O PR #3 foi integrado na `main` (commit `1ab608286c601b1a9e8c15f13c01ff1f540647c7`). A base upstream Qt6/KF6 continua experimental e ainda não é declarada versão de produção.
 
 ## Fundação CAD
 
-- Motor base: QElectroTech 0.200.1-dev, Qt6/KF6, commit fixado em `UPSTREAM_BASELINE.md`; experimental, não declarado estável para produção.
-- Estratégia candidata: submódulo upstream + CMake de topo ElectroCAD + módulos próprios ligados ao alvo de objetos QElectroTech, formando um único executável.
-- Se o build hierárquico não for compatível, usar fork de integração com histórico upstream explícito; não criar um segundo executável.
-- Alterações upstream devem ser pequenas, rastreáveis e testadas.
-- Preservar formatos de projeto e criar testes de compatibilidade antes de os alterar.
+- Motor base: QElectroTech 0.200.1-dev, Qt6/KF6, commit fixado em `UPSTREAM_BASELINE.md`.
+- Uma única aplicação integrada; não criar wrapper nem segundo editor.
+- Preservar formatos upstream e testar compatibilidade antes de os alterar.
 
 ## Módulos próprios previstos
 
@@ -34,14 +32,20 @@ A estratégia de integração está documentada em [INTEGRATION_STRATEGY.md](INT
 - Testes unitários, integração, regressão e projetos de referência.
 - Mensagens claras para dados incompletos ou não verificados.
 
-## Primeiro módulo implementado (em validação)
+## Modelo elétrico implementado
 
-O diretório `src/electrocad/` contém o primeiro núcleo C++ do modelo elétrico. Regista terminais identificados por componente e terminal e aceita ligações apenas entre terminais registados. Rejeita identificadores vazios, terminais desconhecidos, auto-ligações e ligações duplicadas sem depender da ordem dos extremos. O código é incluído no alvo do executável QElectroTech; os testes próprios são registados no CTest. Esta implementação ainda não está validada por build CI nem representa um modelo completo de redes, derivações ou continuidade.
+`src/electrocad/electricalmodel.*` implementa registo de terminais, ligações, redes e associação exclusiva de terminais a redes. Rejeita IDs vazios, terminais desconhecidos, auto-ligações e ligações duplicadas. O módulo e os testes próprios passaram CI Windows nos runs 45881881930, 45901278849 e 45901297058.
 
-## Modelo elétrico mínimo
+## Adaptador nativo QElectroTech
 
-Uma ligação identifica terminais concretos nas duas extremidades. Redes e derivações são explícitas. Continuidade interna só é aplicada quando existir modelo funcional verificado. Sem esse modelo, o comportamento é desconhecido.
+`QetDiagramAdapter` constrói um snapshot read-only a partir de `Diagram`, `Element`, `Terminal` e `Conductor`. Usa UUIDs estáveis, considera apenas condutores explícitos e agrupa terminais ligados em componentes conexos, incluindo derivações. Não infere continuidade interna dos aparelhos, não altera o diagrama e não substitui os algoritmos de potencial QET.
+
+O adaptador passou compilação, testes do workflow e verificação do executável nos runs 45901278849 e 45901297058. Ainda não existe teste funcional de edição/sincronização bidirecional nem de persistência ElectroCAD.
+
+## Limites e próximos passos
+
+Continuam por validar deployment de Qt, recursos, traduções, elementos e modelos; abrir/guardar/exportar projetos reais; integração com comandos do editor e undo/redo; potenciais e continuidade interna validada; identificação de condutores; referências cruzadas; diagnóstico e biblioteca IEC com proveniência/licenças verificadas.
 
 ## IEC e conteúdo normativo
 
-A biblioteca de símbolos regista identificador, fonte, edição/versão, descrição, terminais, licença e estado de validação. Conteúdo oficial IEC 60617 depende de acesso e direitos adequados. Não reproduzir conteúdo normativo protegido sem autorização.
+A biblioteca de símbolos deverá registar identificador, fonte, edição/versão, descrição, terminais, licença e estado de validação. Conteúdo oficial IEC 60617 depende de acesso e direitos adequados. Não reproduzir conteúdo normativo protegido sem autorização.

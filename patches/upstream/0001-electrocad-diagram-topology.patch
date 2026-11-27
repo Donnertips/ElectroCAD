@@ -1,0 +1,21 @@
+diff --git a/sources/diagramview.h b/sources/diagramview.h
+--- a/sources/diagramview.h
++++ b/sources/diagramview.h
+@@ -26,1 +26,2 @@
+ class Diagram;
++namespace electrocad { class QetDiagramTopology; }
+@@ -61,1 +62,2 @@
+ 		Diagram          *m_diagram = nullptr;
++		electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
+@@ -158,1 +160,2 @@
+ 		Diagram *diagram() { return(m_diagram); }
++		electrocad::QetDiagramTopology *electricalTopology() const { return m_electrocad_topology; }
+diff --git a/sources/diagramview.cpp b/sources/diagramview.cpp
+--- a/sources/diagramview.cpp
++++ b/sources/diagramview.cpp
+@@ -19,1 +19,2 @@
+ #include "diagramview.h"
++#include "qetdiagramtopology.h"
+@@ -153,1 +154,2 @@
+ 	setScene(m_diagram);
++	m_electrocad_topology = m_diagram ? new electrocad::QetDiagramTopology(*m_diagram, this) : nullptr;
