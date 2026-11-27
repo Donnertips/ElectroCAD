@@ -17,6 +17,9 @@ QetDiagramTopology::QetDiagramTopology(Diagram &diagram, QObject *parent) :
 {
     connect(&diagram, &QGraphicsScene::changed, this,
             [this](const QList<QRectF> &) { scheduleRefresh(); });
+    connect(&diagram, &QObject::destroyed, this, [this]() {
+        m_diagram = nullptr;
+    });
 
     // The view may be created after the diagram has already been loaded.
     refreshNow();
