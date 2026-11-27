@@ -65,14 +65,28 @@ A estrutura final pode ser ajustada pelo teste de integração, sem mudar o prin
 
 Foi criado `src/electrocad/electricalmodel.*`, um núcleo C++17 inicial que regista terminais identificados por componente/terminal e liga pares de terminais existentes. Rejeita identificadores vazios, terminais desconhecidos, auto-ligações e ligações duplicadas (mesmo quando a ordem dos extremos é invertida). Os testes próprios ficam em `src/electrocad/tests/` e são registados no CTest. O objeto é adicionado ao alvo `qelectrotech`, pelo que a intenção é compilar o código próprio dentro do executável único, sem produzir uma segunda aplicação.
 
-Este núcleo ainda não representa redes, nós com múltiplas derivações, continuidade interna de aparelhos, potenciais ou referências cruzadas. Não se deve inferir qualquer uma dessas funções a partir de uma simples ligação.
+A camada de modelo também representa redes nomeadas, permitindo agrupar vários terminais numa mesma rede e consultar/remover associações. Esta topologia não infere continuidade interna de aparelhos, potenciais ou referências cruzadas.
+
+## Integração do modelo com os objetos nativos do diagrama
+
+A auditoria do baseline upstream `b49ce16c42b99e458e38935f39b919d56582e54e` confirmou as seguintes interfaces públicas:
+
+- `Diagram::elements()` e `Diagram::conductors()` expõem os símbolos e condutores de um fólio.
+- `Element::terminals()` expõe os terminais de cada símbolo e `Element::uuid()` fornece a identidade da instância.
+- `Terminal::stableUuid()` fornece uma identidade estável para o terminal, incluindo elementos antigos cujas definições não guardavam UUID próprio.
+- `Conductor::terminal1`, `Conductor::terminal2` e `Conductor::isValid()` identificam as extremidades de cada condutor explícito.
+
+O adaptador `QetDiagramAdapter` constrói um snapshot do modelo ElectroCAD a partir destas interfaces. Regista os terminais do fólio, lê apenas os condutores explícitos e agrupa os terminais ligados em componentes conexos (redes), incluindo derivações. A identidade da rede é determinística a partir do menor par de IDs dos seus terminais.
+
+O adaptador não interpreta continuidade interna de componentes, não substitui os algoritmos de potencial do QElectroTech e não altera o diagrama. É uma camada de leitura; a sincronização bidirecional, persistência e integração com comandos/undo continuam por desenvolver. O alvo de integração é separado do alvo de testes unitários para não obrigar os testes do modelo a ligar todo o motor QET.
 
 ## Estado
 
-A estratégia de integração e o primeiro módulo próprio foram integrados em `main` através do PR #1 (merge commit `19c51ccc8112ebc0d31fca53dba2ec8949d9abf2`). O workflow Windows do ElectroCAD no commit `49cef6c21e89a25895ecf14656e52d1b5acfd2d5` concluiu com sucesso: checkout upstream/submódulos, configuração CMake hierárquica, verificação do alvo integrado, build, testes unitários e verificação do executável. Run: https://github.com/Donnertips/ElectroCAD/actions/runs/45869976768.
+- PR #1 integrou a estrutura CMake e o primeiro núcleo no `main`.
+- PR #2 integrou o modelo de redes/derivações no `main` (squash commit `55780d60608714c450e7e2899187cccdf5b69310`). O CI Windows passou build, testes unitários e verificação do executável: https://github.com/Donnertips/ElectroCAD/actions/runs/45881881930.
+- O artefacto `electrocad-qelectrotech-integration-win64` é apenas um artefacto de CI, não um instalador de produção.
+- O adaptador de leitura do diagrama está em desenvolvimento no PR seguinte e ainda depende de compilação/testes próprios.
+- O checkout upstream continua a ser feito separadamente no CI; o submódulo Git `external/qelectrotech` ainda não foi adotado.
+- Deployment completo de Qt/recursos/traduções/elementos/modelos e os fluxos funcionais de abrir, guardar e exportar continuam por validar.
 
-O artefacto `electrocad-qelectrotech-integration-win64` é um artefacto de CI (14 483 505 bytes), não um instalador de produção. O workflow ainda não demonstra deployment completo de Qt, recursos, traduções, elementos e modelos, nem os fluxos funcionais de abrir, guardar e exportar.
-
-A integração CMake hierárquica está validada no workflow atual, mas o checkout upstream ainda é feito num passo separado do CI; a adoção do submódulo Git `external/qelectrotech` prevista na estratégia continua pendente. O núcleo inicial de terminais/ligações compila e os testes passam.
-
-A evolução em curso acrescenta redes elétricas nomeadas e associação de vários terminais a uma rede, incluindo derivações. Esta representação de topologia não presume continuidade interna de aparelhos, nem substitui ainda o editor gráfico de fios/nós. A Fase 1 permanece aberta até validação funcional, deployment e integração com os documentos do QElectroTech.
+A Fase 1 permanece aberta até validação do adaptador, integração bidirecional com o editor, persistência e testes funcionais de projetos reais.
