@@ -14,7 +14,7 @@ diff --git a/sources/diagramview.h b/sources/diagramview.h
 +		electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
  		DVEventInterface *m_event_interface = nullptr;
  		QAction          *m_paste_here = nullptr;
-@@ -162,4 +163,5 @@
+@@ -162,5 +163,6 @@
  		QString title() const;
  		void editDiagramProperties();
  		Diagram *diagram() { return(m_diagram); }
