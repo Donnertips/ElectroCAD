@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   windows-integration:
@@ -94,8 +95,8 @@ jobs:
       - name: Configure ElectroCAD integration tree
         shell: msys2 {0}
         run: |
-          set -euo pipefail
-          cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -G Ninja             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_PREFIX_PATH=/ucrt64             -DQt6_DIR=/ucrt64/lib/cmake/Qt6             -DQT_VERSION_MAJOR=6             -DBUILD_WITH_KF=ON             -DBUILD_KF=OFF             -DPACKAGE_TESTS=ON             -DCMAKE_POLICY_DEFAULT_CMP0077=NEW             -DCMAKE_POLICY_VERSION_MINIMUM=3.5             -DQET_EXPORT_PROJECT_DB=ON             -DQET_ENABLE_SPACEMOUSE=ON             -DQET_SPACEMOUSE_BACKEND=hid             -DSQLite3_INCLUDE_DIR=/ucrt64/include             -DSQLite3_LIBRARY=/ucrt64/lib/libsqlite3.dll.a
+          set -o pipefail
+          cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -G Ninja             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_PREFIX_PATH=/ucrt64             -DQt6_DIR=/ucrt64/lib/cmake/Qt6             -DQT_VERSION_MAJOR=6             -DBUILD_WITH_KF=ON             -DBUILD_KF=OFF             -DPACKAGE_TESTS=ON             -DCMAKE_POLICY_DEFAULT_CMP0077=NEW             -DCMAKE_POLICY_VERSION_MINIMUM=3.5             -DQET_EXPORT_PROJECT_DB=ON             -DQET_ENABLE_SPACEMOUSE=ON             -DQET_SPACEMOUSE_BACKEND=hid             -DSQLite3_INCLUDE_DIR=/ucrt64/include             -DSQLite3_LIBRARY=/ucrt64/lib/libsqlite3.dll.a 2>&1 | tee "$GITHUB_WORKSPACE/configure.log"
 
       - name: Verify integrated application target
         shell: msys2 {0}
@@ -106,16 +107,16 @@ jobs:
       - name: Build
         shell: msys2 {0}
         run: |
-          set -euo pipefail
-          cmake --build "$GITHUB_WORKSPACE/build" --parallel "$(nproc)"
+          set -o pipefail
+          cmake --build "$GITHUB_WORKSPACE/build" --parallel "$(nproc)" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
 
       - name: Run unit tests
         shell: msys2 {0}
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          set -euo pipefail
-          ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure --timeout 900
+          set -o pipefail
+          ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure --timeout 900 2>&1 | tee "$GITHUB_WORKSPACE/test.log"
 
       - name: Verify executable
         shell: msys2 {0}
@@ -126,6 +127,51 @@ jobs:
           test "$(stat -c%s "$exe")" -gt 100000
           echo "Integrated build executable: $exe"
           echo "Size: $(stat -c%s "$exe") bytes"
+
+      - name: Collect failure diagnostics
+        if: failure()
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+          {
+            echo '## Patch status'
+            cd "$GITHUB_WORKSPACE/upstream"
+            git status --short || true
+            echo '## Configure log tail'
+            tail -n 200 "$GITHUB_WORKSPACE/configure.log" 2>/dev/null || true
+            echo '## Build log tail'
+            tail -n 300 "$GITHUB_WORKSPACE/build.log" 2>/dev/null || true
+            echo '## Test log tail'
+            tail -n 200 "$GITHUB_WORKSPACE/test.log" 2>/dev/null || true
+          } > "$GITHUB_WORKSPACE/failure-diagnostics.txt"
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrocad-integration-failure-diagnostics
+          path: failure-diagnostics.txt
+          if-no-files-found: warn
+
+      - name: Publish failure diagnostics
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let diagnostics = '';
+            try {
+              diagnostics = fs.readFileSync('failure-diagnostics.txt', 'utf8');
+            } catch (error) {
+              diagnostics = 'No failure diagnostics were generated.';
+            }
+            const body = '### Falha na integração ElectroCAD\n\n```text\n' + diagnostics.slice(0, 60000) + '\n```';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
 
       - name: Upload integration test artifacts
         uses: actions/upload-artifact@v4
