@@ -1,21 +1,26 @@
 diff --git a/sources/diagramview.h b/sources/diagramview.h
 --- a/sources/diagramview.h
 +++ b/sources/diagramview.h
-@@ -26,1 +26,2 @@
+@@ -32,3 +32,4 @@
+ class CellRuler;
+ class Conductor;
  class Diagram;
 +namespace electrocad { class QetDiagramTopology; }
-@@ -61,1 +62,2 @@
+ class DiagramContextToolbar;
+@@ -63,1 +64,2 @@
  		Diagram          *m_diagram = nullptr;
 +		electrocad::QetDiagramTopology *m_electrocad_topology = nullptr;
-@@ -158,1 +160,2 @@
+@@ -162,1 +163,2 @@
  		Diagram *diagram() { return(m_diagram); }
 +		electrocad::QetDiagramTopology *electricalTopology() const { return m_electrocad_topology; }
 diff --git a/sources/diagramview.cpp b/sources/diagramview.cpp
 --- a/sources/diagramview.cpp
 +++ b/sources/diagramview.cpp
-@@ -19,1 +19,2 @@
+@@ -18,3 +18,4 @@
  #include "diagramview.h"
+ #include "itemdescription.h"
+ #include "shownkinds.h"
 +#include "qetdiagramtopology.h"
-@@ -153,1 +154,2 @@
+@@ -138,1 +139,2 @@
  	setScene(m_diagram);
 +	m_electrocad_topology = m_diagram ? new electrocad::QetDiagramTopology(*m_diagram, this) : nullptr;
