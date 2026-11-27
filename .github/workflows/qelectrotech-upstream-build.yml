@@ -14,9 +14,11 @@ on:
     branches:
       - main
       - feature/qelectrotech-integration
+      - feature/editor-topology-integration
     paths:
       - "CMakeLists.txt"
       - "src/electrocad/**"
+      - "patches/upstream/**"
       - ".github/workflows/qelectrotech-upstream-build.yml"
       - "docs/INTEGRATION_STRATEGY.md"
 
