@@ -43,6 +43,20 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Normalize upstream checkout line endings
+        shell: msys2 {0}
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/upstream"
+          git config core.autocrlf false
+          git config core.eol lf
+          git checkout -- .
+          test -z "$(git status --porcelain)" || {
+            echo 'Upstream working tree is not clean after line-ending normalization:'
+            git status --porcelain
+            exit 1
+          }
+
       - name: Install MSYS2 toolchain and dependencies
         uses: msys2/setup-msys2@v2
         with:
