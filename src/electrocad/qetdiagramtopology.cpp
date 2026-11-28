@@ -27,12 +27,20 @@ QetDiagramTopology::QetDiagramTopology(Diagram &diagram, QObject *parent) :
 
 void QetDiagramTopology::refreshNow()
 {
-    if (!m_diagram) {
-        m_model = ElectricalModel{};
+    ElectricalModel next = m_diagram
+        ? QetDiagramAdapter::buildModel(*m_diagram)
+        : ElectricalModel{};
+
+    // Scene updates that do not alter the electrical topology (moving a
+    // symbol, repainting, text edits) must not notify listeners.
+    if (next == m_model) {
         return;
     }
 
-    m_model = QetDiagramAdapter::buildModel(*m_diagram);
+    m_last_change = next.diff(m_model);
+    m_model = std::move(next);
+    ++m_revision;
+
     if (m_changed_callback) {
         m_changed_callback();
     }

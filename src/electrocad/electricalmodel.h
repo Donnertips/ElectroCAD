@@ -35,6 +35,11 @@ enum class ConnectionError {
 struct ElectricalNet {
     std::string id;
     std::vector<TerminalRef> terminals;
+
+    bool operator==(const ElectricalNet &other) const
+    {
+        return id == other.id && terminals == other.terminals;
+    }
 };
 
 enum class NetError {
@@ -45,6 +50,21 @@ enum class NetError {
     UnknownTerminal,
     TerminalAlreadyAssigned,
     TerminalNotAssigned
+};
+
+// Structural difference between two topology snapshots. Connections are
+// reported with their endpoints in canonical (sorted) order.
+struct ModelChange {
+    std::vector<TerminalRef> added_terminals;
+    std::vector<TerminalRef> removed_terminals;
+    std::vector<Connection> added_connections;
+    std::vector<Connection> removed_connections;
+
+    bool empty() const noexcept
+    {
+        return added_terminals.empty() && removed_terminals.empty()
+            && added_connections.empty() && removed_connections.empty();
+    }
 };
 
 class ElectricalModel final {
@@ -60,6 +80,16 @@ public:
     const ElectricalNet *net(const std::string &net_id) const noexcept;
     const ElectricalNet *netForTerminal(const TerminalRef &terminal) const noexcept;
     const std::map<std::string, ElectricalNet> &nets() const noexcept;
+
+    // Two models are equal when they hold the same terminals, the same
+    // connections (regardless of direction or insertion order) and the same
+    // nets with the same members.
+    bool operator==(const ElectricalModel &other) const;
+    bool operator!=(const ElectricalModel &other) const { return !(*this == other); }
+
+    // Terminals and connections present in this model but not in
+    // `previous` (added) and the other way round (removed).
+    ModelChange diff(const ElectricalModel &previous) const;
 
 private:
     std::set<TerminalRef> terminals_;

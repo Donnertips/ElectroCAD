@@ -31,4 +31,10 @@ if(BUILD_TESTING)
     )
     target_link_libraries(electrocad_model_tests PRIVATE electrocad_core)
     add_test(NAME electrocad_model_tests COMMAND electrocad_model_tests)
+
+    add_executable(electrocad_model_diff_tests
+        tests/model_diff_tests.cpp
+    )
+    target_link_libraries(electrocad_model_diff_tests PRIVATE electrocad_core)
+    add_test(NAME electrocad_model_diff_tests COMMAND electrocad_model_diff_tests)
 endif()
