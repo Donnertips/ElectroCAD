@@ -109,7 +109,7 @@ jobs:
             git apply --check --ignore-whitespace --whitespace=nowarn "$patch_file"
             git apply --ignore-whitespace --whitespace=nowarn "$patch_file"
             git diff --ignore-space-at-eol --stat
-            changed="$(git diff --name-only | sort | tr '\n' ' ')"
+            changed="$(git diff --ignore-space-at-eol --numstat | awk '($1+$2)>0 {print $3}' | sort | tr '\n' ' ')"
             echo "Changed files: [$changed]"
             test "$changed" = "sources/diagramview.cpp sources/diagramview.h "
             grep -q 'QetDiagramTopology' sources/diagramview.h
