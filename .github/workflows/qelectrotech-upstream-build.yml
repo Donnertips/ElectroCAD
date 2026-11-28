@@ -102,9 +102,15 @@ jobs:
         run: |
           set -euo pipefail
           cd "$GITHUB_WORKSPACE/upstream"
-          git apply --check "$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
-          git apply "$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
-          git diff --check
+          patch_file="$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
+          git apply --check --ignore-whitespace --whitespace=nowarn "$patch_file"
+          git apply --ignore-whitespace --whitespace=nowarn "$patch_file"
+          git diff --ignore-space-at-eol --stat
+          changed="$(git diff --name-only | sort | tr '\n' ' ')"
+          echo "Changed files: $changed"
+          test "$changed" = "sources/diagramview.cpp sources/diagramview.h "
+          grep -q 'QetDiagramTopology' sources/diagramview.h
+          grep -q 'QetDiagramTopology' sources/diagramview.cpp
 
       - name: Configure ElectroCAD integration tree
         shell: msys2 {0}
@@ -156,7 +162,7 @@ jobs:
               echo '## Upstream status'
               git status --porcelain 2>/dev/null | head -n 100 || true
               echo '## Upstream diff stat'
-              git diff --stat 2>/dev/null | tail -n 20 || true
+              git diff --ignore-space-at-eol --stat 2>/dev/null | tail -n 20 || true
             else
               echo 'The upstream directory or its Git metadata is missing.'
             fi
