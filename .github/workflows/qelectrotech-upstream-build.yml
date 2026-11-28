@@ -25,6 +25,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  actions: read
 
 jobs:
   windows-integration:
@@ -100,17 +101,20 @@ jobs:
       - name: Apply ElectroCAD editor integration patch
         shell: msys2 {0}
         run: |
-          set -euo pipefail
-          cd "$GITHUB_WORKSPACE/upstream"
-          patch_file="$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
-          git apply --check --ignore-whitespace --whitespace=nowarn "$patch_file"
-          git apply --ignore-whitespace --whitespace=nowarn "$patch_file"
-          git diff --ignore-space-at-eol --stat
-          changed="$(git diff --name-only | sort | tr '\n' ' ')"
-          echo "Changed files: $changed"
-          test "$changed" = "sources/diagramview.cpp sources/diagramview.h "
-          grep -q 'QetDiagramTopology' sources/diagramview.h
-          grep -q 'QetDiagramTopology' sources/diagramview.cpp
+          set -o pipefail
+          {
+            set -ex
+            cd "$GITHUB_WORKSPACE/upstream"
+            patch_file="$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
+            git apply --check --ignore-whitespace --whitespace=nowarn "$patch_file"
+            git apply --ignore-whitespace --whitespace=nowarn "$patch_file"
+            git diff --ignore-space-at-eol --stat
+            changed="$(git diff --name-only | sort | tr '\n' ' ')"
+            echo "Changed files: [$changed]"
+            test "$changed" = "sources/diagramview.cpp sources/diagramview.h "
+            grep -q 'QetDiagramTopology' sources/diagramview.h
+            grep -q 'QetDiagramTopology' sources/diagramview.cpp
+          } 2>&1 | tee "$GITHUB_WORKSPACE/patch.log"
 
       - name: Configure ElectroCAD integration tree
         shell: msys2 {0}
@@ -167,6 +171,8 @@ jobs:
               echo 'The upstream directory or its Git metadata is missing.'
             fi
             cd "$GITHUB_WORKSPACE"
+            echo '## Patch step log tail'
+            tail -n 80 patch.log 2>/dev/null || true
             echo '## Configure log tail'
             tail -n 200 configure.log 2>/dev/null || true
             echo '## Build log tail'
@@ -195,7 +201,26 @@ jobs:
             } catch (error) {
               diagnostics = 'No failure diagnostics were generated.\n\nFailed before diagnostic collection could run.';
             }
-            const body = '### Falha na integração ElectroCAD\n\n```text\n' + diagnostics.slice(0, 60000) + '\n```';
+            let failedSteps = 'unknown';
+            try {
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId
+              });
+              const failed = [];
+              for (const job of jobs.data.jobs) {
+                for (const step of job.steps || []) {
+                  if (step.conclusion === 'failure') {
+                    failed.push(job.name + ' :: ' + step.name);
+                  }
+                }
+              }
+              failedSteps = failed.length ? failed.join('\n') : 'none reported';
+            } catch (error) {
+              failedSteps = 'could not query steps: ' + error.message;
+            }
+            const body = '### Falha na integração ElectroCAD\n\n**Failed step(s):**\n```text\n' + failedSteps + '\n```\n\n```text\n' + diagnostics.slice(0, 55000) + '\n```';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
