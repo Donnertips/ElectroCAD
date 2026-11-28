@@ -148,9 +148,19 @@ jobs:
         run: |
           set -euo pipefail
           {
-            echo '## Patch status'
-            cd "$GITHUB_WORKSPACE/upstream"
-            git status --short || true
+            echo '## Workspace'
+            ls -la "$GITHUB_WORKSPACE" 2>/dev/null || true
+            echo '## Upstream checkout'
+            if [ -d "$GITHUB_WORKSPACE/upstream/.git" ]; then
+              cd "$GITHUB_WORKSPACE/upstream"
+              echo "HEAD: $(git rev-parse HEAD 2>/dev/null || echo unavailable)"
+              echo '## Upstream status'
+              git status --porcelain 2>/dev/null | head -n 100 || true
+              echo '## Upstream diff stat'
+              git diff --stat 2>/dev/null | tail -n 20 || true
+            else
+              echo 'The upstream directory or its Git metadata is missing.'
+            fi
             echo '## Configure log tail'
             tail -n 200 "$GITHUB_WORKSPACE/configure.log" 2>/dev/null || true
             echo '## Build log tail'
@@ -177,7 +187,7 @@ jobs:
             try {
               diagnostics = fs.readFileSync('failure-diagnostics.txt', 'utf8');
             } catch (error) {
-              diagnostics = 'No failure diagnostics were generated.';
+              diagnostics = 'No failure diagnostics were generated.\n\nFailed before diagnostic collection could run.';
             }
             const body = '### Falha na integração ElectroCAD\n\n```text\n' + diagnostics.slice(0, 60000) + '\n```';
             await github.rest.issues.createComment({
