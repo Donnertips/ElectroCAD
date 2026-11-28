@@ -2,6 +2,7 @@
 #include "electricalmodel.h"
 
 #include <algorithm>
+#include <iterator>
 #include <utility>
 
 namespace electrocad {
@@ -128,6 +129,46 @@ const ElectricalNet *ElectricalModel::netForTerminal(const TerminalRef &terminal
 const std::map<std::string, ElectricalNet> &ElectricalModel::nets() const noexcept
 {
     return nets_;
+}
+
+bool ElectricalModel::operator==(const ElectricalModel &other) const
+{
+    return terminals_ == other.terminals_
+        && connection_keys_ == other.connection_keys_
+        && nets_ == other.nets_
+        && terminal_to_net_ == other.terminal_to_net_;
+}
+
+ModelChange ElectricalModel::diff(const ElectricalModel &previous) const
+{
+    using ConnectionKey = std::pair<TerminalRef, TerminalRef>;
+
+    ModelChange change;
+
+    std::set_difference(terminals_.begin(), terminals_.end(),
+                        previous.terminals_.begin(), previous.terminals_.end(),
+                        std::back_inserter(change.added_terminals));
+    std::set_difference(previous.terminals_.begin(), previous.terminals_.end(),
+                        terminals_.begin(), terminals_.end(),
+                        std::back_inserter(change.removed_terminals));
+
+    std::vector<ConnectionKey> added;
+    std::set_difference(connection_keys_.begin(), connection_keys_.end(),
+                        previous.connection_keys_.begin(), previous.connection_keys_.end(),
+                        std::back_inserter(added));
+    for (const ConnectionKey &key : added) {
+        change.added_connections.push_back({key.first, key.second});
+    }
+
+    std::vector<ConnectionKey> removed;
+    std::set_difference(previous.connection_keys_.begin(), previous.connection_keys_.end(),
+                        connection_keys_.begin(), connection_keys_.end(),
+                        std::back_inserter(removed));
+    for (const ConnectionKey &key : removed) {
+        change.removed_connections.push_back({key.first, key.second});
+    }
+
+    return change;
 }
 
 } // namespace electrocad
