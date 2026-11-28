@@ -24,6 +24,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  actions: read
 
 jobs:
   windows-integration:
@@ -41,6 +43,20 @@ jobs:
           path: upstream
           submodules: recursive
           fetch-depth: 0
+
+      - name: Normalize upstream checkout line endings
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/upstream"
+          git config core.autocrlf false
+          git config core.eol lf
+          git checkout -- .
+          test -z "$(git status --porcelain)" || {
+            echo 'Upstream working tree is not clean after line-ending normalization:'
+            git status --porcelain
+            exit 1
+          }
 
       - name: Install MSYS2 toolchain and dependencies
         uses: msys2/setup-msys2@v2
@@ -85,17 +101,26 @@ jobs:
       - name: Apply ElectroCAD editor integration patch
         shell: msys2 {0}
         run: |
-          set -euo pipefail
-          cd "$GITHUB_WORKSPACE/upstream"
-          git apply --check "$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
-          git apply "$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
-          git diff --check
+          set -o pipefail
+          {
+            set -ex
+            cd "$GITHUB_WORKSPACE/upstream"
+            patch_file="$GITHUB_WORKSPACE/patches/upstream/0001-electrocad-diagram-topology.patch"
+            git apply --check --ignore-whitespace --whitespace=nowarn "$patch_file"
+            git apply --ignore-whitespace --whitespace=nowarn "$patch_file"
+            git diff --ignore-space-at-eol --stat
+            changed="$(git diff --ignore-space-at-eol --numstat | awk '($1+$2)>0 {print $3}' | sort | tr '\n' ' ')"
+            echo "Changed files: [$changed]"
+            test "$changed" = "sources/diagramview.cpp sources/diagramview.h "
+            grep -q 'QetDiagramTopology' sources/diagramview.h
+            grep -q 'QetDiagramTopology' sources/diagramview.cpp
+          } 2>&1 | tee "$GITHUB_WORKSPACE/patch.log"
 
       - name: Configure ElectroCAD integration tree
         shell: msys2 {0}
         run: |
-          set -euo pipefail
-          cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -G Ninja             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_PREFIX_PATH=/ucrt64             -DQt6_DIR=/ucrt64/lib/cmake/Qt6             -DQT_VERSION_MAJOR=6             -DBUILD_WITH_KF=ON             -DBUILD_KF=OFF             -DPACKAGE_TESTS=ON             -DCMAKE_POLICY_DEFAULT_CMP0077=NEW             -DCMAKE_POLICY_VERSION_MINIMUM=3.5             -DQET_EXPORT_PROJECT_DB=ON             -DQET_ENABLE_SPACEMOUSE=ON             -DQET_SPACEMOUSE_BACKEND=hid             -DSQLite3_INCLUDE_DIR=/ucrt64/include             -DSQLite3_LIBRARY=/ucrt64/lib/libsqlite3.dll.a
+          set -o pipefail
+          cmake -S "$GITHUB_WORKSPACE" -B "$GITHUB_WORKSPACE/build" -G Ninja             -DCMAKE_BUILD_TYPE=Release             -DCMAKE_PREFIX_PATH=/ucrt64             -DQt6_DIR=/ucrt64/lib/cmake/Qt6             -DQT_VERSION_MAJOR=6             -DBUILD_WITH_KF=ON             -DBUILD_KF=OFF             -DPACKAGE_TESTS=ON             -DCMAKE_POLICY_DEFAULT_CMP0077=NEW             -DCMAKE_POLICY_VERSION_MINIMUM=3.5             -DQET_EXPORT_PROJECT_DB=ON             -DQET_ENABLE_SPACEMOUSE=ON             -DQET_SPACEMOUSE_BACKEND=hid             -DSQLite3_INCLUDE_DIR=/ucrt64/include             -DSQLite3_LIBRARY=/ucrt64/lib/libsqlite3.dll.a 2>&1 | tee "$GITHUB_WORKSPACE/configure.log"
 
       - name: Verify integrated application target
         shell: msys2 {0}
@@ -106,16 +131,16 @@ jobs:
       - name: Build
         shell: msys2 {0}
         run: |
-          set -euo pipefail
-          cmake --build "$GITHUB_WORKSPACE/build" --parallel "$(nproc)"
+          set -o pipefail
+          cmake --build "$GITHUB_WORKSPACE/build" --parallel "$(nproc)" 2>&1 | tee "$GITHUB_WORKSPACE/build.log"
 
       - name: Run unit tests
         shell: msys2 {0}
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          set -euo pipefail
-          ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure --timeout 900
+          set -o pipefail
+          ctest --test-dir "$GITHUB_WORKSPACE/build" --output-on-failure --timeout 900 2>&1 | tee "$GITHUB_WORKSPACE/test.log"
 
       - name: Verify executable
         shell: msys2 {0}
@@ -126,6 +151,82 @@ jobs:
           test "$(stat -c%s "$exe")" -gt 100000
           echo "Integrated build executable: $exe"
           echo "Size: $(stat -c%s "$exe") bytes"
+
+      - name: Collect failure diagnostics
+        if: failure()
+        shell: bash
+        run: |
+          {
+            echo '## Workspace'
+            ls -la "$GITHUB_WORKSPACE" 2>/dev/null || true
+            echo '## Upstream checkout'
+            if [ -d "$GITHUB_WORKSPACE/upstream/.git" ] || [ -f "$GITHUB_WORKSPACE/upstream/.git" ]; then
+              cd "$GITHUB_WORKSPACE/upstream"
+              echo "HEAD: $(git rev-parse HEAD 2>/dev/null || echo unavailable)"
+              echo '## Upstream status'
+              git status --porcelain 2>/dev/null | head -n 100 || true
+              echo '## Upstream diff stat'
+              git diff --ignore-space-at-eol --stat 2>/dev/null | tail -n 20 || true
+            else
+              echo 'The upstream directory or its Git metadata is missing.'
+            fi
+            cd "$GITHUB_WORKSPACE"
+            echo '## Patch step log tail'
+            tail -n 80 patch.log 2>/dev/null || true
+            echo '## Configure log tail'
+            tail -n 200 configure.log 2>/dev/null || true
+            echo '## Build log tail'
+            tail -n 300 build.log 2>/dev/null || true
+            echo '## Test log tail'
+            tail -n 200 test.log 2>/dev/null || true
+          } > "$GITHUB_WORKSPACE/failure-diagnostics.txt"
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electrocad-integration-failure-diagnostics
+          path: failure-diagnostics.txt
+          if-no-files-found: warn
+
+      - name: Publish failure diagnostics
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let diagnostics = '';
+            try {
+              diagnostics = fs.readFileSync('failure-diagnostics.txt', 'utf8');
+            } catch (error) {
+              diagnostics = 'No failure diagnostics were generated.\n\nFailed before diagnostic collection could run.';
+            }
+            let failedSteps = 'unknown';
+            try {
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId
+              });
+              const failed = [];
+              for (const job of jobs.data.jobs) {
+                for (const step of job.steps || []) {
+                  if (step.conclusion === 'failure') {
+                    failed.push(job.name + ' :: ' + step.name);
+                  }
+                }
+              }
+              failedSteps = failed.length ? failed.join('\n') : 'none reported';
+            } catch (error) {
+              failedSteps = 'could not query steps: ' + error.message;
+            }
+            const body = '### Falha na integração ElectroCAD\n\n**Failed step(s):**\n```text\n' + failedSteps + '\n```\n\n```text\n' + diagnostics.slice(0, 55000) + '\n```';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body
+            });
 
       - name: Upload integration test artifacts
         uses: actions/upload-artifact@v4
